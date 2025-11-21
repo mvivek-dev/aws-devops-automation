@@ -1,66 +1,65 @@
-DevOps Automation Project – Terraform + Python + CI/CD
+AWS DevOps Automation Project
 
-This project is part of my DevOps assignment where I have used Terraform to provision AWS resources and a Python script to automate some operations over those resources. I have also set up a basic CI/CD pipeline using GitHub Actions to validate the Terraform code and Python scripts.
+Terraform + Python + GitHub Actions CI
 
-The focus was mainly on Infrastructure as Code, cloud automation using AWS SDK (boto3), and CI validation workflow.
+This project is a part of my DevOps learning/assignment where I combined multiple tools:
 
-Project Folder Structure
-devops-assignment/
-├── terraform/
-│   ├── main.tf
-│   ├── variables.tf
-│   ├── outputs.tf
-│   ├── modules/
-│   │   ├── s3/
-│   │   ├── rds/
-│   │   └── ec2/
-├── scripts/
-│   └── app.py
-├── tests/
-│   └── test_dummy.py
-├── .github/
-│   └── workflows/
-│       └── ci.yml
-├── requirements.txt
-├── .env.example
-└── README.md
+Terraform → write Infrastructure-as-Code
 
-Part 1: Terraform Infrastructure
+Python Automation → interact with AWS services using boto3
 
-I wrote Terraform IaC code to provision the following AWS resources:
+GitHub Actions → run CI validation (Terraform + Python)
 
-Resource	Service	Features Implemented
-S3	Storage bucket	Versioning & lifecycle policy
-RDS MySQL	Managed DB	Parameter group + Security group
-EC2	App instance	IAM role + Instance profile attached
+It helped me understand how DevOps workflows connect from development → automation → pipelines.
 
-📌 Assignment did not require provisioning real infrastructure, so I only ran terraform init and terraform validate (mock setup).
+Project Overview
+Component	Purpose
+Terraform	Creates AWS infra (S3, RDS, EC2) using modules
+Python Script	Uploads logs, lists S3 objects, DB CRUD, EC2 metadata
+CI/CD Pipeline	Linting + Testing + Terraform validation
+
+➡ Infra creation is mock-only (no real AWS deployment needed).
+➡ Python script handles errors nicely if infra is not real.
+
+Terraform Setup
+
+Folder: terraform/
+Resources defined using 3 modules:
+
+modules/s3 → Versioning, lifecycle policy
+
+modules/rds → MySQL RDS instance + SG + parameter group
+
+modules/ec2 → Instance + IAM Role + S3/RDS access
 
 Commands I used
 cd terraform
 terraform init
 terraform validate
-# terraform plan (only checked what would be created)
+# terraform plan (for preview only)
 
-Part 2: Python Automation Script
 
-Inside scripts/app.py, I automated multiple tasks using Python + AWS SDK (boto3) + MySQL driver (pymysql). The script does:
+Terraform state is NOT pushed — as required for mock setup.
 
-Task	Uses
-Creates & uploads log file	S3 bucket
-Lists objects from S3 to a text file	S3
-Creates table, inserts, fetches data	RDS (MySQL)
-Fetches EC2 instance metadata	EC2 API
+Python Automation (scripts/app.py)
 
-💡 Since real AWS resources were not created, errors are handled gracefully and displayed in logs.
+This script does 4 automation tasks:
 
-How I ran it locally
+Task	Service Used
+Upload a log file to S3	S3
+List S3 objects to a text file	S3
+Create table + insert + select row	RDS MySQL
+Fetch instance metadata	EC2 describe API
+
+Uses environment variables for credentials/config.
+All errors are logged properly instead of crashing (helpful in mock environment).
+
+Running it locally
 python -m venv .venv
-source .venv/Scripts/activate   # Git Bash (Windows)
-
+source .venv/Scripts/activate  # Git Bash on Windows
 pip install -r requirements.txt
 
-# Load env vars from .env (copied from .env.example)
+# Load environment variables
 set -a
 source .env
 set +a
@@ -68,66 +67,50 @@ set +a
 python scripts/app.py
 
 
-✔ Runs fully
-✔ Shows logs for mock setup
-✔ Good for assignment evaluation
+Since AWS resources are mocked → logs will show warnings like
+NoSuchBucket, MySQL connection failed, etc.
+➡ This is expected and shows error handling works.
 
-Environment Setup (.env)
 
-Template is provided in .env.example
+Environment Variables
+
+Copy .env.example → .env
 
 AWS_REGION=ap-south-1
-S3_BUCKET_NAME=my-logs-bucket-vivek-2025-mock
+S3_BUCKET_NAME=my-logs-bucket-mock
 
-DB_HOST=mysql-rds-endpoint.amazonaws.com
+DB_HOST=mysql.endpoint.local
 DB_USER=appuser
-DB_PASSWORD=SomePassword
+DB_PASSWORD=somepassword
 DB_NAME=appdb
 
 EC2_PRIVATE_IP=10.0.1.25
 
 
-These values are placeholders since mock infra was used.
 
-Part 3: CI/CD Pipeline
+CI/CD Pipeline (GitHub Actions)
 
-I added GitHub Actions workflow in:
-.github/workflows/ci.yml
+File: .github/workflows/ci.yml
 
-It performs:
+Pipeline job includes:
 
-Step	Tool
-Lint Python code	flake8
-Run tests	pytest
-Validate Terraform config	terraform validate
+✔ Python dependency install
+✔ Code lint (flake8)
+✔ Tests (pytest)
+✔ Terraform init + validate
 
-✔ Runs automatically on push or pull request
-✔ Helps avoid breaking the automation code
+Triggered automatically on push and pull requests
 
-What I Learned
+This ensures:
 
-How to build Terraform modules for real-world cloud deployment
+Code is formatted and import errors caught
 
-Using boto3 to interact with AWS services
+Terraform configuration always stays valid
 
-Secure config handling using environment variables
+Python automation script is testable
 
-Basic CI/CD workflow writing in YAML
-
-Error handling when resources are not actually deployed
-
-Future Improvements (if continued)
-
-Actually deploy the infra (terraform apply)
-
-Host app on EC2 + connect with real RDS DB
-
-Push logs to S3 using CloudWatch agents
-
-Add more unit tests and logging improvements
-
-Conclusion
-
-This assignment helped me integrate multiple DevOps tools together:
-
-Terraform (Provision) + Python (Automate) + CI/CD (Validate)
+📦 Requirements Installed
+boto3
+pymysql
+flake8
+pytest
